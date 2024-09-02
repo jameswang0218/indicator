@@ -61,7 +61,7 @@ func (s *Smma) GetPrice() float64 {
 		return 0
 	}
 
-	index := len(s.smmas) - int(s.offset-2)
+	index := len(s.smmas) - int(s.offset+2)
 	if index < 0 {
 		index = 0
 	}
