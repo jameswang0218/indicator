@@ -13,8 +13,9 @@ type Smma struct {
 // NewSmma 创建一个新的 SMMA 实例，支持周期和历史位数
 func NewSmma(period int32, offset int32) *Smma {
 	return &Smma{
-		period: period,
-		offset: offset,
+		period:    period,
+		offset:    offset,
+		isInitial: true,
 	}
 }
 
@@ -23,7 +24,7 @@ func (s *Smma) Update(price float64) {
 	// 将新价格加入价格队列
 	s.prices = append(s.prices, price)
 
-	if int32(len(s.prices)) < s.period-1 {
+	if int32(len(s.prices)) < s.period {
 		// 还没有足够的数据来计算 SMMA
 		return
 	}
