@@ -55,6 +55,11 @@ func (s *Smma) GetPrice() float64 {
 	return s.prices[index]
 }
 
+// GetPreviousPrice 返回未平滑的价格
+func (s *Smma) GetPreviousPrice() float64 {
+	return s.prices[len(s.prices)-1]
+}
+
 // GetFutureSegment 返回未来数据段的价格值
 func (s *Smma) GetFutureSegment() []float64 {
 	if len(s.prices) == 0 || s.offset < 0 {

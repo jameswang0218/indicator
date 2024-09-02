@@ -28,6 +28,11 @@ func (a *Alligator) GetValues() (lips, teeth, jaw float64) {
 	return a.lips.GetPrice(), a.teeth.GetPrice(), a.jaw.GetPrice()
 }
 
+// GetPreviousValues 返回没有平滑过的，唇线、齿线和颚线的值。
+func (a *Alligator) GetPreviousValues() (lips, teeth, jaw float64) {
+	return a.lips.GetPreviousPrice(), a.teeth.GetPreviousPrice(), a.jaw.GetPreviousPrice()
+}
+
 // GetFutureSegments 返回所有 SMMA 实例的未来数据段
 func (a *Alligator) GetFutureSegments() (jawSegment, teethSegment, lipsSegment []float64) {
 	return a.jaw.GetFutureSegment(), a.teeth.GetFutureSegment(), a.lips.GetFutureSegment()
