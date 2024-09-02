@@ -1,11 +1,15 @@
 package indicator
 
-import "math"
+import (
+	"math"
+	"sync"
+)
 
 type Alligator struct {
 	lips  *Smma
 	teeth *Smma
 	jaw   *Smma
+	m     sync.RWMutex
 }
 
 // NewAlligator 使用 SMMA 初始化鳄鱼线，支持自定义唇线、齿线和颚线的周期。
@@ -19,6 +23,8 @@ func NewAlligator() *Alligator {
 
 // Update 更新最新的价格并更新所有三条移动平均线的值。
 func (a *Alligator) Update(price float64) (lips, teeth, jaw float64) {
+	defer a.m.Unlock()
+	a.m.Lock()
 	a.lips.Update(price)
 	a.teeth.Update(price)
 	a.jaw.Update(price)
@@ -27,7 +33,7 @@ func (a *Alligator) Update(price float64) (lips, teeth, jaw float64) {
 
 // GetValues 返回当前唇线、齿线和颚线的值。
 func (a *Alligator) GetValues() (lips, teeth, jaw float64) {
-	return a.lips.GetPrice(), a.teeth.GetPrice(), a.jaw.GetPrice()
+	return TruncateWithMath(a.lips.GetPrice(), 2), TruncateWithMath(a.teeth.GetPrice(), 2), TruncateWithMath(a.jaw.GetPrice(), 2)
 }
 
 // GetPreviousValues 返回没有平滑过的，唇线、齿线和颚线的值。
@@ -51,5 +57,5 @@ func (a *Alligator) Clone() *Alligator {
 
 func TruncateWithMath(num float64, precision int) float64 {
 	factor := math.Pow(10, float64(precision))
-	return math.Floor(num*factor) / factor
+	return math.Round(num*factor) / factor
 }
