@@ -33,12 +33,12 @@ func (a *Alligator) Update(price float64) (lips, teeth, jaw float64) {
 
 // GetValues 返回当前唇线、齿线和颚线的值。
 func (a *Alligator) GetValues() (lips, teeth, jaw float64) {
-	return TruncateWithMath(a.lips.GetPrice(), 2), TruncateWithMath(a.teeth.GetPrice(), 2), TruncateWithMath(a.jaw.GetPrice(), 2)
+	return a.lips.GetPrice(), a.teeth.GetPrice(), a.jaw.GetPrice()
 }
 
 // GetPreviousValues 返回没有平滑过的，唇线、齿线和颚线的值。
 func (a *Alligator) GetPreviousValues() (lips, teeth, jaw float64) {
-	return TruncateWithMath(a.lips.GetPreviousPrice(), 2), TruncateWithMath(a.teeth.GetPreviousPrice(), 2), TruncateWithMath(a.jaw.GetPreviousPrice(), 2)
+	return a.lips.GetPreviousPrice(), a.teeth.GetPreviousPrice(), a.jaw.GetPreviousPrice()
 }
 
 // GetFutureSegments 返回所有 SMMA 实例的未来数据段
@@ -56,6 +56,6 @@ func (a *Alligator) Clone() *Alligator {
 }
 
 func TruncateWithMath(num float64, precision int) float64 {
-	factor := math.Pow(10, float64(precision))
+	factor := math.Pow10(precision)
 	return math.Round(num*factor) / factor
 }
