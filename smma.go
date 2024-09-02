@@ -20,20 +20,13 @@ func NewSmma(period int32, offset int32) *Smma {
 
 // Update 更新当前价格并计算 SMMA
 func (s *Smma) Update(price float64) {
-	if s.isInitial {
-		// 第一个周期，计算 SMMA1
-		sum := 0.0
-		for _, p := range s.prices {
-			sum += p
-		}
-		s.smma = sum / float64(s.period)
-		s.isInitial = false
-	} else {
-		// 后续周期，计算 SMMA(i)
-		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
-	}
+	// 后续周期，计算 SMMA(i)
+	s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
 	// 将计算出来的 SMMA 值加入价格队列
 	s.prices = append(s.prices, s.smma)
+	if len(s.prices) > 100 {
+		s.prices = s.prices[len(s.prices)-50:]
+	}
 }
 
 // GetPrice 返回指定历史位数的价格值
