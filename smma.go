@@ -23,28 +23,34 @@ func (s *Smma) Update(price float64) {
 	// 将新价格加入价格队列
 	s.prices = append(s.prices, price)
 
-	// 第一个周期值
-	if int32(len(s.prices)) <= s.period {
-		// 计算初始 SMA
-		sum := 0.0
-		for _, p := range s.prices {
-			sum += p
-		}
-		s.smma = sum / float64(s.period)
+	if int32(len(s.prices)) < s.period-1 {
+		// 还没有足够的数据来计算 SMMA
 		return
 	}
 
-	// 后续周期，计算 SMMA
-	s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+	if s.isInitial {
+		// 第一个周期，计算 SMA 作为初始 SMMA
+		sum := 0.0
+		// 使用周期长度内的数据计算 SMA
+		startIndex := len(s.prices) - int(s.period)
+		for _, p := range s.prices[startIndex:] {
+			sum += p
+		}
+		s.smma = sum / float64(s.period)
+		s.isInitial = false
+	} else {
+		// 后续周期，计算 SMMA
+		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+	}
 
 	s.smmas = append(s.smmas, s.smma)
 
 	// 长度处理
-	if int32(len(s.prices)) > s.period*3 {
-		s.prices = s.prices[len(s.prices)-int(s.period*3):] // 保持价格队列长度为周期长度的两倍
+	if int32(len(s.prices)) > s.period*4 {
+		s.prices = s.prices[len(s.prices)-int(s.period*4):] // 保持价格队列长度为周期长度的4倍
 	}
-	if int32(len(s.smmas)) > s.period*3 {
-		s.smmas = s.smmas[len(s.smmas)-int(s.period*3):] // 保持 smmas 列表长度为周期长度的两倍
+	if int32(len(s.smmas)) > s.period*4 {
+		s.smmas = s.smmas[len(s.smmas)-int(s.period*4):] // 保持 smmas 列表长度为周期长度的4倍
 	}
 }
 
