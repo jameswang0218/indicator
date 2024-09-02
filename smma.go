@@ -29,7 +29,7 @@ func (s *Smma) Update(price float64) {
 		s.smma = alpha*price + (1-alpha)*s.smma
 		//s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
 	}
-
+	s.age += 1
 	// 将计算出来的 SMMA 值加入价格队列
 	s.prices = append(s.prices, s.smma)
 	if len(s.prices) > 100 {
