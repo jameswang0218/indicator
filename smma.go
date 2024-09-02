@@ -23,25 +23,19 @@ func (s *Smma) Update(price float64) {
 	// 将新价格加入价格队列
 	s.prices = append(s.prices, price)
 
-	if int32(len(s.prices)) < s.period {
-		// 还没有足够的数据来计算 SMMA
-		return
-	}
-
-	if s.isInitial {
-		// 第一个周期，计算 SMA 作为初始 SMMA
+	// 第一个周期值
+	if int32(len(s.prices)) <= s.period {
+		// 计算初始 SMA
 		sum := 0.0
-		// 使用周期长度内的数据计算 SMA
-		startIndex := len(s.prices) - int(s.period)
-		for _, p := range s.prices[startIndex:] {
+		for _, p := range s.prices {
 			sum += p
 		}
 		s.smma = sum / float64(s.period)
-		s.isInitial = false
-	} else {
-		// 后续周期，计算 SMMA
-		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+		return
 	}
+
+	// 后续周期，计算 SMMA
+	s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
 
 	s.smmas = append(s.smmas, s.smma)
 

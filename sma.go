@@ -2,7 +2,6 @@ package indicator
 
 import (
 	"container/list"
-	"sync"
 )
 
 // Sma 结构体定义
@@ -10,7 +9,6 @@ type Sma struct {
 	period int
 	queue  *list.List
 	sum    float64
-	m      sync.RWMutex
 }
 
 // NewSma 创建一个新的 Sma 对象
@@ -23,8 +21,6 @@ func NewSma(period int) *Sma {
 
 // Update 更新 Sma 值
 func (s *Sma) Update(price float64) float64 {
-	defer s.m.Unlock()
-	s.m.Lock()
 	if s.queue.Len() >= s.period {
 		s.sum -= s.queue.Remove(s.queue.Front()).(float64)
 	}
