@@ -7,6 +7,7 @@ type Smma struct {
 	smma      float64
 	isInitial bool
 	offset    int32 // 用于指定要获取的历史位数
+	age       uint32
 }
 
 // NewSmma 创建一个新的 SMMA 实例，支持历史位数
@@ -20,8 +21,15 @@ func NewSmma(period int32, offset int32) *Smma {
 
 // Update 更新当前价格并计算 SMMA
 func (s *Smma) Update(price float64) {
-	// 后续周期，计算 SMMA(i)
-	s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+	if s.age == 0 {
+		s.smma = price
+	} else {
+		// 后续周期，计算 SMMA(i)
+		alpha := float64(1 / s.period)
+		s.smma = alpha*price + (1-alpha)*s.smma
+		//s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+	}
+
 	// 将计算出来的 SMMA 值加入价格队列
 	s.prices = append(s.prices, s.smma)
 	if len(s.prices) > 100 {
