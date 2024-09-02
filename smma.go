@@ -23,9 +23,9 @@ func (s *Smma) Update(price float64) {
 		s.smma = price
 	} else {
 		// 后续周期，计算 SMMA(i)
-		alpha := float64(1 / s.period)
-		s.smma = alpha*price + (1-alpha)*s.smma
-		//s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+		//alpha := float64(1 / s.period)
+		//s.smma = alpha*price + (1-alpha)*s.smma
+		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
 	}
 	s.age += 1
 	// 将计算出来的 SMMA 值加入价格队列
