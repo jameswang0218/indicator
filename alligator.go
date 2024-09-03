@@ -42,8 +42,8 @@ func (a *Alligator) GetPreviousValues() (lips, teeth, jaw float64) {
 }
 
 // GetFutureSegments 返回所有 SMMA 实例的未来数据段
-func (a *Alligator) GetFutureSegments() (jawSegment, teethSegment, lipsSegment []float64) {
-	return a.jaw.GetFutureSegment(), a.teeth.GetFutureSegment(), a.lips.GetFutureSegment()
+func (a *Alligator) GetFutureSegments() (lipsSegment, teethSegment, jawSegment []float64) {
+	return a.lips.GetFutureSegment(), a.teeth.GetFutureSegment(), a.jaw.GetFutureSegment()
 }
 
 // Clone 创建当前鳄鱼线实例的深拷贝。

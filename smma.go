@@ -2,20 +2,19 @@ package indicator
 
 // Smma 结构体，包含平滑类型和历史位数
 type Smma struct {
-	period    int32
-	prices    []float64
-	smma      float64
-	smmas     []float64
-	offset    int32 // 用于指定要获取的历史位数
-	isInitial bool
+	period int32
+	prices []float64
+	smma   float64
+	smmas  []float64
+	offset int32 // 用于指定要获取的历史位数
+	age    uint64
 }
 
 // NewSmma 创建一个新的 SMMA 实例，支持周期和历史位数
 func NewSmma(period int32, offset int32) *Smma {
 	return &Smma{
-		period:    period,
-		offset:    offset,
-		isInitial: true,
+		period: period,
+		offset: offset,
 	}
 }
 
@@ -23,29 +22,25 @@ func NewSmma(period int32, offset int32) *Smma {
 func (s *Smma) Update(price float64) {
 	// 将新价格加入价格队列
 	s.prices = append(s.prices, price)
+	s.age++
 
-	if int32(len(s.prices)) < s.period {
-		// 还没有足够的数据来计算 SMMA
+	if s.age < uint64(s.period) {
 		return
-	}
-
-	if s.isInitial {
+	} else if s.age == uint64(s.period) {
 		// 第一个周期，计算 SMA 作为初始 SMMA
-		sum := 0.0
+		sum1 := 0.0
 		// 使用周期长度内的数据计算 SMA
 		startIndex := len(s.prices) - int(s.period)
 		for _, p := range s.prices[startIndex:] {
-			sum += p
+			sum1 += p
 		}
-		s.smma = sum / float64(s.period)
-		s.isInitial = false
+		s.smma = sum1 / float64(s.period)
 	} else {
 		// 后续周期，计算 SMMA
 		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
 	}
 
 	s.smmas = append(s.smmas, s.smma)
-
 	// 长度处理
 	if int32(len(s.prices)) > s.period*4 {
 		s.prices = s.prices[len(s.prices)-int(s.period*4):] // 保持价格队列长度为周期长度的4倍
@@ -94,12 +89,12 @@ func (s *Smma) GetFutureSegment() []float64 {
 // Clone 创建当前 SMMA 实例的深拷贝
 func (s *Smma) Clone() *Smma {
 	clone := &Smma{
-		period:    s.period,
-		prices:    append([]float64{}, s.prices...), // 深拷贝价格数据
-		smma:      s.smma,
-		smmas:     append([]float64{}, s.smmas...), // 深拷贝 smma 数据
-		offset:    s.offset,
-		isInitial: s.isInitial,
+		period: s.period,
+		prices: append([]float64{}, s.prices...), // 深拷贝价格数据
+		smma:   s.smma,
+		smmas:  append([]float64{}, s.smmas...), // 深拷贝 smma 数据
+		offset: s.offset,
+		age:    s.age,
 	}
 	return clone
 }
