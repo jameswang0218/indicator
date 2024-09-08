@@ -22,7 +22,6 @@ func NewSmma(period int32, offset int32) *Smma {
 func (s *Smma) Update(price float64) {
 	// 将新价格加入价格队列
 	s.prices = append(s.prices, price)
-	s.age++
 
 	if s.age < uint64(s.period) {
 		return
@@ -30,15 +29,16 @@ func (s *Smma) Update(price float64) {
 		// 第一个周期，计算 SMA 作为初始 SMMA
 		sum1 := 0.0
 		// 使用周期长度内的数据计算 SMA
-		startIndex := len(s.prices) - int(s.period)
-		for _, p := range s.prices[startIndex:] {
+		for _, p := range s.prices {
 			sum1 += p
 		}
 		s.smma = sum1 / float64(s.period)
 	} else {
-		// 后续周期，计算 SMMA
-		s.smma = (s.smma*float64(s.period-1) + price) / float64(s.period)
+		prevSum := s.smma * float64(s.period)
+		// 后续周期，计算 SUMMA
+		s.smma = (prevSum - s.smma + price) / float64(s.period)
 	}
+	s.age++
 
 	s.smmas = append(s.smmas, s.smma)
 	// 长度处理
