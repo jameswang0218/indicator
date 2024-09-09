@@ -13,11 +13,11 @@ type Alligator struct {
 }
 
 // NewAlligator 使用 SMMA 初始化鳄鱼线，支持自定义唇线、齿线和颚线的周期。
-func NewAlligator() *Alligator {
+func NewAlligator(lp, tp, jp int, lf, tf, jf int) *Alligator {
 	return &Alligator{
-		lips:  NewSmma(5, 3),
-		teeth: NewSmma(8, 5),
-		jaw:   NewSmma(13, 8),
+		lips:  NewSmma(lp, lf),
+		teeth: NewSmma(tp, tf),
+		jaw:   NewSmma(jp, jf),
 	}
 }
 
