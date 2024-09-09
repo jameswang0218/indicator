@@ -1,62 +1,63 @@
 package indicator
 
-// Smma 结构体，包含平滑类型和历史位数
 type Smma struct {
-	period int32
+	period int
 	prices []float64
 	smma   float64
 	smmas  []float64
-	offset int32 // 用于指定要获取的历史位数
+	offset int
 	age    uint64
 }
 
-// NewSmma 创建一个新的 SMMA 实例，支持周期和历史位数
-func NewSmma(period int32, offset int32) *Smma {
+type Price struct {
+	High  float64
+	Low   float64
+	Close float64
+}
+
+func NewSmma(period int, offset int) *Smma {
+	if period <= 0 || offset < 0 {
+		panic("Invalid period or offset")
+	}
 	return &Smma{
 		period: period,
 		offset: offset,
 	}
 }
 
-// Update 更新当前价格并计算 SMMA
-func (s *Smma) Update(price float64) {
-	// 将新价格加入价格队列
-	s.prices = append(s.prices, price)
+func (s *Smma) Update(price Price) {
+	mid := (price.High + price.Low) / 2
+	s.prices = append(s.prices, mid)
+	s.age++
 
 	if s.age < uint64(s.period) {
 		return
 	} else if s.age == uint64(s.period) {
-		// 第一个周期，计算 SMA 作为初始 SMMA
 		sum1 := 0.0
-		// 使用周期长度内的数据计算 SMA
 		for _, p := range s.prices {
 			sum1 += p
 		}
 		s.smma = sum1 / float64(s.period)
-	} else {
-		prevSum := s.smma * float64(s.period)
-		// 后续周期，计算 SUMMA
-		s.smma = (prevSum - s.smma + price) / float64(s.period)
+	} else if s.age > uint64(s.period) {
+		s.smma = (s.smma*(float64(s.period)-1) + mid) / float64(s.period)
 	}
-	s.age++
 
 	s.smmas = append(s.smmas, s.smma)
-	// 长度处理
-	if int32(len(s.prices)) > s.period*4 {
-		s.prices = s.prices[len(s.prices)-int(s.period*4):] // 保持价格队列长度为周期长度的4倍
+
+	if len(s.prices) > s.period*4 {
+		s.prices = s.prices[len(s.prices)-s.period*4:]
 	}
-	if int32(len(s.smmas)) > s.period*4 {
-		s.smmas = s.smmas[len(s.smmas)-int(s.period*4):] // 保持 smmas 列表长度为周期长度的4倍
+	if len(s.smmas) > s.period*4 {
+		s.smmas = s.smmas[len(s.smmas)-s.period*4:]
 	}
 }
 
-// GetPrice 返回指定历史位数的价格值
 func (s *Smma) GetPrice() float64 {
 	if len(s.smmas) == 0 || s.offset <= 0 {
 		return 0
 	}
 
-	index := len(s.smmas) - int(s.offset+1)
+	index := len(s.smmas) - (s.offset + 1)
 	if index < 0 {
 		index = 0
 	}
@@ -64,7 +65,6 @@ func (s *Smma) GetPrice() float64 {
 	return s.smmas[index]
 }
 
-// GetPreviousPrice 返回未平滑的价格
 func (s *Smma) GetPreviousPrice() float64 {
 	if len(s.smmas) == 0 {
 		return 0
@@ -72,13 +72,12 @@ func (s *Smma) GetPreviousPrice() float64 {
 	return s.smmas[len(s.smmas)-1]
 }
 
-// GetFutureSegment 返回未来数据段的价格值
 func (s *Smma) GetFutureSegment() []float64 {
-	if len(s.smmas) == 0 || s.offset < 0 {
+	if len(s.smmas) == 0 || s.offset <= 0 {
 		return nil
 	}
 
-	startIndex := len(s.smmas) - int(s.offset)
+	startIndex := len(s.smmas) - s.offset
 	if startIndex < 0 {
 		startIndex = 0
 	}
@@ -86,13 +85,12 @@ func (s *Smma) GetFutureSegment() []float64 {
 	return s.smmas[startIndex:]
 }
 
-// Clone 创建当前 SMMA 实例的深拷贝
 func (s *Smma) Clone() *Smma {
 	clone := &Smma{
 		period: s.period,
-		prices: append([]float64{}, s.prices...), // 深拷贝价格数据
+		prices: append([]float64{}, s.prices...),
 		smma:   s.smma,
-		smmas:  append([]float64{}, s.smmas...), // 深拷贝 smma 数据
+		smmas:  append([]float64{}, s.smmas...),
 		offset: s.offset,
 		age:    s.age,
 	}

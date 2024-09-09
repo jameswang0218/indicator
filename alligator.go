@@ -22,7 +22,7 @@ func NewAlligator() *Alligator {
 }
 
 // Update 更新最新的价格并更新所有三条移动平均线的值。
-func (a *Alligator) Update(price float64) (lips, teeth, jaw float64) {
+func (a *Alligator) Update(price Price) (lips, teeth, jaw float64) {
 	defer a.m.Unlock()
 	a.m.Lock()
 	a.lips.Update(price)
