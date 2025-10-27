@@ -1,3 +1,3 @@
-module github.com/jameswang0218/indicator
+module github.com/wangze0218/indicator
 
-go 1.19
+go 1.25
